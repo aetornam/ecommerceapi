@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1740521500711,
+      "tag": "0000_brown_medusa",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1740525203607,
+      "tag": "0001_fixed_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1740526001618,
+      "tag": "0002_strange_human_fly",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1740565087622,
+      "tag": "0003_shallow_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1740570608437,
+      "tag": "0004_sturdy_lockjaw",
+      "breakpoints": true
+    }
+  ]
+}

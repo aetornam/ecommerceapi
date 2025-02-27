@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  backend:
+    build: .
+    ports:
+      - "5051:5051"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: awiti@2020
+      POSTGRES_DB: ecommerce
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # Redis Service
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  pg_data:
