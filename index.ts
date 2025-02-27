@@ -41,7 +41,7 @@ app.use(compression());
 
 
 // Root route 
-app.get('/', (req, res) => {
+app.get('/api/v1', (req, res) => {
   res.send({ message: 'Welcome to API' });
 });
 
