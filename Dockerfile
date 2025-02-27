@@ -14,7 +14,8 @@ COPY . .
 # Expose port (match Express server)
 EXPOSE 5051
 
+RUN npm run build
 # Start server
-CMD ["npm", "run", "start"] 
-# Change to ["npm", "run", "dev"] for development
+CMD ["npm", "run", "dev"] 
+# Change to ["npm", "run", "start"] for development
 
