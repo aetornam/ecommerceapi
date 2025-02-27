@@ -1,12 +1,12 @@
 # Use Node.js as base image
-FROM node:18
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package.json  package-lock.json ./
-RUN npm install --frozen-lockfile
+RUN npm install --production
 
 # Copy the rest of the app
 COPY . .
@@ -15,4 +15,6 @@ COPY . .
 EXPOSE 5051
 
 # Start server
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"] 
+# Change to ["npm", "run", "dev"] for development
+

@@ -19,7 +19,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: awiti@2020
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ecommerce
     volumes:
       - pg_data:/var/lib/postgresql/data
