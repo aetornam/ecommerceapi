@@ -1,8 +1,13 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import { UserController } from "../controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
+
+// Root route 
+router.get('/', (req, res) => {
+  res.send({ message: 'Welcome to API' });
+});
 
 // Public route: User registration
 router.post("/users", async (req, res) => {

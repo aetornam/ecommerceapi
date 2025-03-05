@@ -10,7 +10,7 @@ export class UserController {
     try {
       const { mode, userId, accessToken, ...data } = req.body; // Extract token from body
       if (
-        !["createnew", "update", "delete", "retrieve", "login"].includes(mode)
+        !["createnew", "update", "delete", "retrieve", "login", "logout"].includes(mode)
       ) {
         return res.status(400).json({
           status: 400,
@@ -52,7 +52,32 @@ export class UserController {
         }
       }
 
-      // **Create New User**
+     // **Logout User**
+if (mode === "logout") {
+  if (!accessToken) {
+    return res.status(401).json({
+      status: 401,
+      message: "Access token required for logout.",
+      data: null,
+    });
+  }
+
+  try {
+    await UserService.logoutUser(accessToken);
+    return res.status(200).json({
+      status: 200,
+      message: "Logout successful.",
+      data: null,
+    });
+  } catch (error: any) {
+    return res.status(400).json({
+      status: 400,
+      message: error.message || "Logout failed.",
+      data: null,
+    });
+  }
+}
+
       // **Create New User**
       if (mode === "createnew") {
         try {

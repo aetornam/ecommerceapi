@@ -6,12 +6,14 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import compression from "compression";
 import router from './src/routes/route';
+import { rateLimiter } from './src/middleware/rateLimiter';
+import morganMiddleware from './src/middleware/morganMiddleware';
 
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 5051;
 
-
+app.set('trust proxy', 1);
 // Rate limiter 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -31,21 +33,22 @@ const corsOptions = {
   ],
   credentials: true,
 };
-
+app.use(morganMiddleware);
 app.use(cors(corsOptions));
 app.use(cookieParser()); 
 app.use(express.json());
 app.use(helmet());
 app.use(limiter);
 app.use(compression());
+app.use('/api', rateLimiter)
 
-
-// Root route 
-app.get('/api/v1', (req, res) => {
-  res.send({ message: 'Welcome to API' });
-});
 
 app.use('/api/v1', router);
+
+app.get('/', (req, res) => {
+  res.status(200).send('OK');
+});
+
   
 // Start the server
 app.listen(port, () => {

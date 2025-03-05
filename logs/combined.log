@@ -1,0 +1,5 @@
+{"level":"info","message":"POST /api/v1/users 200 207 - 238.680 ms","timestamp":"2025-02-28 23:47:03"}
+{"level":"info","message":"GET / 200 2 - 5144.862 ms","timestamp":"2025-03-05 16:05:50"}
+{"level":"info","message":"GET /favicon.ico 404 150 - 928.888 ms","timestamp":"2025-03-05 16:06:23"}
+{"level":"info","message":"POST /api/users 404 149 - 44.346 ms","timestamp":"2025-03-05 16:18:04"}
+{"level":"info","message":"POST /api/v1/users 500 60 - 156.146 ms","timestamp":"2025-03-05 16:18:25"}

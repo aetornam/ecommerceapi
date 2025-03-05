@@ -4,12 +4,9 @@ import db from "../db/db";
 import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm/sql";
-import redis from "../config/redisClient";
-
 // Constants
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const SALT_ROUNDS = 10;
-const REDIS_TTL = 60 * 10; // Cache data for 10 minutes
 
 // Define Role & JWT Payload Types
 type UserRole = "customer" | "admin" | "seller";
@@ -26,17 +23,13 @@ export class UserService {
   }
 
   // **Verify JWT Token**
-  static async verifyToken(accessToken: string): Promise<JwtPayload> {
-    // Check if token is blacklisted
-    const isBlacklisted = await redis.get(`blacklist:${accessToken}`);
-    if (isBlacklisted) {
-      throw new Error("Token is invalid. Please log in again.");
-    }
-
+  static verifyToken(accessToken: string): JwtPayload {
     const decoded = jwt.verify(accessToken, JWT_SECRET) as JwtPayload;
+
     if (!["customer", "admin", "seller"].includes(decoded.role)) {
       throw new Error("Invalid role in token.");
     }
+
     return decoded;
   }
 
@@ -77,49 +70,26 @@ export class UserService {
 
     if (!newUser) throw new Error("User registration failed.");
 
-    const { passwordHash, ...userData } = newUser;
+    const { passwordHash, ...userData } = newUser; // Exclude password from response
     const accessToken = UserService.generateToken(
       userData.id,
       userData.role as UserRole
-    );
-
-    // Cache user in Redis
-    await redis.set(
-      `user:${userData.id}`,
-      JSON.stringify(userData),
-      "EX",
-      REDIS_TTL
-    );
+    ); // Ensure correct type
 
     return { accessToken, user: userData };
   }
 
   // **Login User**
   static async loginUser(email: string, password: string) {
-    const cachedUser = await redis.get(`user_email:${email}`);
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
 
-    let user;
-    if (cachedUser) {
-      user = JSON.parse(cachedUser);
-    } else {
-      const dbUser = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
-      if (!dbUser.length) throw new Error("Invalid email or password.");
-      user = dbUser[0];
+    if (!user.length) throw new Error("Invalid email or password.");
 
-      // Cache user by email
-      await redis.set(
-        `user_email:${email}`,
-        JSON.stringify(user),
-        "EX",
-        REDIS_TTL
-      );
-    }
-
-    const { passwordHash, id, role, ...userData } = user;
+    const { passwordHash, id, role, ...userData } = user[0];
 
     const isPasswordValid = await UserService.comparePassword(
       password,
@@ -132,26 +102,14 @@ export class UserService {
     return { accessToken, user: { id, role, ...userData } };
   }
 
-  // **Logout User (Blacklist Token)**
-  static async logoutUser(accessToken: string) {
-    const decoded = UserService.verifyToken(accessToken);
-
-    // Store the token in Redis with its expiration time
-    await redis.set(`blacklist:${accessToken}`, "1", "EX", 60 * 60 * 24 * 7); // Expire in 7 days
-
-    return { message: "User logged out successfully." };
-  }
-
   // **Fetch All Users**
   static async getAllUsers(accessToken: string) {
     const decoded = UserService.verifyToken(accessToken);
-    if ((await decoded).role !== "admin")
+    if (decoded.role !== "admin") {
       throw new Error("Unauthorized: Only admins can fetch all users.");
+    }
 
-    const cachedUsers = await redis.get("all_users");
-    if (cachedUsers) return JSON.parse(cachedUsers);
-
-    const usersList = await db
+    return await db
       .select({
         id: users.id,
         name: users.name,
@@ -161,25 +119,18 @@ export class UserService {
         createdAt: users.createdAt,
       })
       .from(users)
-      .orderBy(desc(users.createdAt));
-
-    // Cache users
-    await redis.set("all_users", JSON.stringify(usersList), "EX", REDIS_TTL);
-
-    return usersList;
+      .orderBy(desc(users.createdAt)); // Use `desc()` function properly
   }
 
   // **Fetch User by ID**
   static async getUserById(userId: number, accessToken: string) {
-    const decoded = await UserService.verifyToken(accessToken);
+    const decoded = UserService.verifyToken(accessToken);
+
     if (decoded.userId !== userId && decoded.role !== "admin") {
       throw new Error(
         "Unauthorized: You can only view your own profile unless you're an admin."
       );
     }
-
-    const cachedUser = await redis.get(`user:${userId}`);
-    if (cachedUser) return JSON.parse(cachedUser);
 
     const user = await db
       .select({
@@ -196,12 +147,9 @@ export class UserService {
 
     if (!user.length) throw new Error("User not found.");
 
-    await redis.set(`user:${userId}`, JSON.stringify(user[0]), "EX", REDIS_TTL);
-
     return user[0];
   }
 
-  // **Update User**
   // **Update User**
   static async updateUser(
     userId: number,
@@ -214,51 +162,60 @@ export class UserService {
     }>,
     accessToken: string
   ) {
-    const decoded = await UserService.verifyToken(accessToken);
+    const decoded = UserService.verifyToken(accessToken);
+  
     if (decoded.userId !== userId && decoded.role !== "admin") {
-      throw new Error(
-        "Unauthorized: You can only update your own profile unless you're an admin."
-      );
+      throw new Error("Unauthorized: You can only update your own profile unless you're an admin.");
     }
-
-    if (updateData.role && decoded.role !== "admin")
+  
+    if (updateData.role && decoded.role !== "admin") {
       throw new Error("Only admins can update user roles.");
-
+    }
+  
     const dbUpdateData: Record<string, any> = {};
+    console.log(dbUpdateData)
     if (updateData.name) dbUpdateData.name = updateData.name;
     if (updateData.email) dbUpdateData.email = updateData.email;
     if (updateData.role) dbUpdateData.role = updateData.role;
-    if (updateData.phoneNumber)
-      dbUpdateData.phoneNumber = updateData.phoneNumber;
-
+    if (updateData.phoneNumber) dbUpdateData.phoneNumber = updateData.phoneNumber;
+  
+    // **Handle Password Update Separately**
     if (updateData.password) {
-      const hashedPassword = await UserService.hashPassword(
-        updateData.password
-      );
-      dbUpdateData.passwordHash = hashedPassword;
+      const hashedPassword = await UserService.hashPassword(updateData.password);
+      dbUpdateData.passwordHash = hashedPassword; // Store hashed password
     }
-
-    if (Object.keys(dbUpdateData).length === 0)
+  
+    // **Check if there is at least one valid field to update**
+    if (Object.keys(dbUpdateData).length === 0) {
       throw new Error("No valid fields to update.");
-
+    }
+  
+    // **Update Database**
     const [updatedUser] = await db
       .update(users)
       .set(dbUpdateData)
       .where(eq(users.id, userId))
-      .returning();
-
-    if (!updatedUser) throw new Error("User update failed.");
-
-    // **Invalidate Cache**
-    await redis.del(`user:${userId}`);
-    await redis.del("all_users"); // Also invalidate the all users list
-
+      .returning({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        phoneNumber: users.phoneNumber,
+        createdAt: users.createdAt,
+      });
+  
+    if (!updatedUser) {
+      throw new Error("User update failed.");
+    }
+  
     return updatedUser;
   }
+  
 
   // **Delete User**
   static async deleteUser(userId: number, accessToken: string) {
-    const decoded = await UserService.verifyToken(accessToken);
+    const decoded = UserService.verifyToken(accessToken);
+
     if (decoded.role !== "admin") {
       throw new Error("Only admins can delete users.");
     }
@@ -272,10 +229,6 @@ export class UserService {
       throw new Error("User not found or already deleted.");
     }
 
-    // **Invalidate Cache**
-    await redis.del(`user:${userId}`);
-    await redis.del("all_users");
-
-    return { user: deletedUser[0] };
+    return { user: deletedUser[0] }; // Return deleted user details
   }
 }

@@ -7,7 +7,7 @@ import {
   integer,
   numeric,
   boolean,
-  unique,
+  unique, 
   index,
   foreignKey,
 } from "drizzle-orm/pg-core";
