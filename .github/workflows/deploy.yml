@@ -19,18 +19,13 @@ jobs:
           curl -L https://fly.io/install.sh | sh
           echo "FLYCTL_INSTALL=$HOME/.fly" >> $GITHUB_ENV
           echo "$HOME/.fly/bin" >> $GITHUB_PATH
+          source $GITHUB_ENV
 
       - name: Verify Fly.io CLI Installation
         run: flyctl version
 
       - name: Authenticate with Fly.io
-        run: flyctl auth login --access-token ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl auth token | flyctl auth --access-token ${{ secrets.FLY_API_TOKEN }}
 
-      - name: Deploy Backend
+      - name: Deploy Backend, Redis, and Nginx
         run: flyctl deploy -a ecommerce-api
-
-      - name: Deploy Redis
-        run: flyctl deploy -a ecommerce-redis
-
-      - name: Deploy Nginx
-        run: flyctl deploy -a ecommerce-nginx
