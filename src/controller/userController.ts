@@ -99,7 +99,7 @@ if (mode === "logout") {
         } catch (error: any) {
           return res.status(400).json({
             status: 400,
-            message: error.message || "Failed to register user.",
+            message: error ,
             data: null,
           });
         }

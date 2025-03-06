@@ -5,19 +5,13 @@ import { users } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { desc } from "drizzle-orm/sql";
 import redis from "../config/redisClient";
-
+import {UserRole, JwtPayload} from "../types/type"
+import {JWT_SECRET, SALT_ROUNDS, REDIS_TTL} from "../constant/constant"
 // Constants
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const SALT_ROUNDS = 10;
-const REDIS_TTL = 60 * 10; // Cache data for 10 minutes
+// const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+// const SALT_ROUNDS = 10;
+// const REDIS_TTL = 60 * 10; // Cache data for 10 minutes
 
-// Define Role & JWT Payload Types
-type UserRole = "customer" | "admin" | "seller";
-
-interface JwtPayload {
-  userId: number;
-  role: UserRole;
-}
 
 export class UserService {
   // **Generate JWT Token**

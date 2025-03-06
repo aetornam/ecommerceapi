@@ -1,0 +1,40 @@
+flyctl create
+flyctl postgres create
+flyctl postgres connect -a ecommerce-db-app
+CREATE DATABASE ecommerce_db;
+\l                  -- List databases
+\c ecommerce_api    -- Switch to your DB
+\dt                 -- List tables
+\du                 -- List users
+flyctl proxy 5433 -a ecommerce-db-app
+npm run db:push
+
+
+
+If you want to create a new user and grant access to the database:
+
+CREATE USER ecommerce_user WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE ecommerce_db TO ecommerce_user;
+
+
+
+Postgres cluster nyansapo created
+  Username:    postgres
+  Password:    lIohx0Jg3vKVMNs
+  Hostname:    nyansapo.internal
+  Flycast:     fdaa:12:69a:0:1::5
+  Proxy port:  5432
+  Postgres port:  5433
+  Connection string: postgres://postgres:lIohx0Jg3vKVMNs@nyansapo.flycast:5432
+
+
+
+
+for deployments
+flyctl secrets set DB_HOST=ecommerce-db-app.internal
+flyctl secrets set DB_PORT=5432
+flyctl secrets set DB_USER=postgres
+flyctl secrets set DB_PASSWORD=RNVlsEbJHATaKX2
+flyctl secrets set DB_NAME=nyansapo_db
+
+flyctl secrets list
