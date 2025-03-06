@@ -1,0 +1,33 @@
+name: Deploy to Fly.io
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Services to Fly.io
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Fly CLI
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          export PATH=$HOME/.fly/bin:$PATH
+          flyctl version
+
+      - name: Authenticate with Fly.io
+        run: flyctl auth token | flyctl auth login --access-token ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy Backend
+        run: flyctl deploy -a ecommerce-api
+
+      - name: Deploy Redis
+        run: flyctl deploy -a ecommerce-redis
+
+      - name: Deploy Nginx
+        run: flyctl deploy -a ecommerce-nginx
