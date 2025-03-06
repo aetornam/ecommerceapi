@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy Services to Fly.io
+    name: Deploy Backend to Fly.io
     runs-on: ubuntu-latest
 
     steps:
@@ -19,17 +19,24 @@ jobs:
           curl -L https://fly.io/install.sh | sh
           echo "FLYCTL_INSTALL=$HOME/.fly" >> $GITHUB_ENV
           echo "$HOME/.fly/bin" >> $GITHUB_PATH
-          source $GITHUB_ENV
 
       - name: Verify Fly.io CLI Installation
         run: flyctl version
 
       - name: Authenticate with Fly.io
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-        run: flyctl auth login --access-token "$FLY_API_TOKEN"
+        run: flyctl auth token
 
-      - name: Deploy Backend, Redis, and Nginx
+      - name: Deploy Backend
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
         run: flyctl deploy -a ecommerce-api
+
+      - name: Deploy Redis
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy -a ecommerce-redis
+
+      - name: Deploy Nginx
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: flyctl deploy -a ecommerce-nginx
