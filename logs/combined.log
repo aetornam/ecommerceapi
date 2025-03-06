@@ -3,3 +3,12 @@
 {"level":"info","message":"GET /favicon.ico 404 150 - 928.888 ms","timestamp":"2025-03-05 16:06:23"}
 {"level":"info","message":"POST /api/users 404 149 - 44.346 ms","timestamp":"2025-03-05 16:18:04"}
 {"level":"info","message":"POST /api/v1/users 500 60 - 156.146 ms","timestamp":"2025-03-05 16:18:25"}
+{"level":"info","message":"GET /api/v1 200 28 - 49.672 ms","timestamp":"2025-03-05 16:44:32"}
+{"level":"info","message":"GET /api 404 142 - 11.884 ms","timestamp":"2025-03-05 16:45:27"}
+{"level":"info","message":"GET /api/v1/ 200 28 - 7.749 ms","timestamp":"2025-03-05 16:46:33"}
+{"level":"info","message":"POST /api/v1/users 200 207 - 6492.195 ms","timestamp":"2025-03-05 16:47:03"}
+{"level":"info","message":"POST /api/v1/users 200 207 - 13.215 ms","timestamp":"2025-03-05 16:47:27"}
+{"level":"info","message":"POST /api/v1/users 200 207 - 3059.219 ms","timestamp":"2025-03-05 17:23:24"}
+{"level":"info","message":"POST /api/v1/users - - - - ms","timestamp":"2025-03-06 08:40:49"}
+{"level":"info","message":"POST /api/v1/users - - - - ms","timestamp":"2025-03-06 08:40:58"}
+{"level":"info","message":"POST /api/v1/users 400 86 - 414.641 ms","timestamp":"2025-03-06 08:42:43"}

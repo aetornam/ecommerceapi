@@ -15,7 +15,7 @@ const logger = winston.createLogger({
     new winston.transports.File({ filename: "logs/error.log", level: "error" }), // Errors to file
     new winston.transports.File({ filename: "logs/combined.log" }), // All logs to file
   ],
-});
+}); 
 
 // If not in production, log to console in a readable format
 if (process.env.NODE_ENV !== "production") {
