@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+      "target": "ES2020",
+      "module": "commonjs",
+      "rootDir": "./",
+      "outDir": "./build",
+      "esModuleInterop": true,
+      "strict": true,
+      "skipLibCheck": true,
+      "resolveJsonModule": true,
+      "allowJs": true,
+      "typeRoots": [
+        "node_modules/@types",
+        "./src/types" // Ensure your custom types are included
+      ],
+
+    },
+    "include": [
+      // "./api/*.ts",
+      "./index.ts",
+      "./src/**/*.ts",
+      "src/types/**/*.d.ts" // Make sure your custom types are included here
+    ],
+    "exclude": ["node_modules"]
+  }
+  
