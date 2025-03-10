@@ -57,6 +57,8 @@ export const products = pgTable(
     description: text("description"),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
     stock: integer("stock").notNull().default(0),
+    sku: varchar("sku", { length: 255 }).notNull(),
+    image: varchar("image", { length: 500 }), // Stores image URL or path
     categoryId: integer("category_id")
       .notNull()
       .references(() => categories.id, { onDelete: "cascade" }),

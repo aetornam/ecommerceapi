@@ -1,5 +1,9 @@
 import { UserService } from "./userService";
+import { CategoryService} from "./categoryService";
+import { ProductService } from "./ProductService";
 
 export {
-    UserService
+    UserService,
+    CategoryService,
+    ProductService
 }
